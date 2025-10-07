@@ -4,5 +4,11 @@ enum class CatBreed {
     AmericanCurl,
     BalineseJavanese,
     ExoticShorthair,
+    Bengal,
+    Birman,
+    Bombay,
+    MaineCoon,
+    Persian,
+    Sphynx,
     Unknown
 }
