@@ -2,6 +2,7 @@ package com.example.lab_week_06
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lab_week_06.model.CatModel
 
@@ -11,12 +12,25 @@ class CatAdapter(
     private val onClickListener: OnClickListener
 ) : RecyclerView.Adapter<CatViewHolder>() {
 
+    // 🔹 Delete Callback Instantiation
+    val swipeToDeleteCallback = SwipeToDeleteCallback()
+
+    // 🔹 Data List
     private val cats = mutableListOf<CatModel>()
 
+    // Mengatur ulang data di adapter
     fun setData(newCats: List<CatModel>) {
         cats.clear()
         cats.addAll(newCats)
         notifyDataSetChanged()
+    }
+
+    // Menghapus item berdasarkan posisi
+    fun removeItem(position: Int) {
+        if (position in cats.indices) {
+            cats.removeAt(position)
+            notifyItemRemoved(position)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CatViewHolder {
@@ -30,7 +44,41 @@ class CatAdapter(
         holder.bindData(cats[position])
     }
 
+    // Interface untuk klik item
     interface OnClickListener {
         fun onItemClick(cat: CatModel)
+    }
+
+    // 🔹 Inner Class untuk swipe-to-delete
+    inner class SwipeToDeleteCallback :
+        ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean = false
+
+        override fun getMovementFlags(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder
+        ): Int {
+            return if (viewHolder is CatViewHolder) {
+                makeMovementFlags(
+                    ItemTouchHelper.ACTION_STATE_IDLE,
+                    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+                ) or makeMovementFlags(
+                    ItemTouchHelper.ACTION_STATE_SWIPE,
+                    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+                )
+            } else {
+                0
+            }
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            val position = viewHolder.adapterPosition
+            removeItem(position)
+        }
     }
 }
